@@ -6,6 +6,8 @@ import Cookies from 'js-cookie';
 import Button from '@material-ui/core/Button';
 import Radio from '@material-ui/core/Radio';
 import {DataGrid} from '@material-ui/data-grid';
+
+import NewAssignment from './NewAssignment';
 import {SERVER_URL} from '../constants.js'
 
 // NOTE:  for OAuth security, http request must have
@@ -43,6 +45,35 @@ class Assignment extends Component {
     })
     .catch(err => console.error(err)); 
   }
+
+  createAssignment = (data) => {
+    const token = Cookies.get('XSRF-TOKEN');
+    const url = `${SERVER_URL}/assignment`;
+    const fetchOptions = {  
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': token }, 
+      body: JSON.stringify({
+        assignmentName: data.name,
+        courseId: data.courseId,
+        dueDate: data.dueDate,
+      })
+    }
+
+    fetch(url, fetchOptions)
+      .then(res => {
+        if (res.ok) {
+          toast.success("Assignment successfully created", {position: toast.POSITION.BOTTOM_LEFT});
+          this.fetchAssignments();
+        } else {
+          toast.error("Assignment creation failed", {position: toast.POSITION.BOTTOM_LEFT});
+          console.error('Put http status =' + res.status);
+        }
+      })
+      .catch(err => {
+        toast.error("Assignment creation failed", {position: toast.POSITION.BOTTOM_LEFT});
+        console.error(err);
+      });
+  }
   
    onRadioClick = (event) => {
     console.log("Assignment.onRadioClick " + event.target.value);
@@ -58,7 +89,7 @@ class Assignment extends Component {
         renderCell: (params) => (
           <div>
           <Radio
-            checked={params.row.id == this.state.selected}
+            checked={params.row.id === this.state.selected}
             onChange={this.onRadioClick}
             value={params.row.id}
             color="default"
@@ -72,16 +103,18 @@ class Assignment extends Component {
       { field: 'dueDate', headerName: 'Due Date', width: 200 }
       ];
       return (
-          <div align="left" >
-                <h4>Assignment(s) ready to grade: </h4>
-                  <div style={{ height: 450, width: '100%', align:"left"   }}>
-                    <DataGrid rows={this.state.rows} columns={columns} />
-                  </div>                
-                <Button component={Link} to={{pathname:'/gradebook' , assignment: this.state.rows[this.state.selected]}} 
-                        variant="outlined" color="primary" disabled={this.state.rows.length==0}  style={{margin: 10}}>
-                  Grade
-                </Button>
-          </div>
+        <div align="left" >
+          <NewAssignment onAddAssignment={this.createAssignment} />
+          <h4>Assignment(s) ready to grade: </h4>
+            <div style={{ height: 450, width: '100%', align:"left"   }}>
+              <DataGrid rows={this.state.rows} columns={columns} />
+            </div>                
+          <Button component={Link} to={{pathname:'/gradebook' , assignment: this.state.rows[this.state.selected]}} 
+                  variant="outlined" color="primary" disabled={this.state.rows.length===0}  style={{margin: 10}}>
+            Grade
+          </Button>
+          <ToastContainer autoClose={1500} />   
+        </div>
       )
   }
 }  
