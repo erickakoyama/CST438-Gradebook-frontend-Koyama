@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Grid from '@material-ui/core/Grid';
@@ -83,12 +82,12 @@ class Gradebook extends Component {
             });
             console.error('Put http status =' + res.status);
       }})
-        .catch(err => {
-          toast.error("Grade updated failed", {
-            position: toast.POSITION.BOTTOM_LEFT
-          });
-          console.error(err);
+      .catch(err => {
+        toast.error("Grade updated failed", {
+          position: toast.POSITION.BOTTOM_LEFT
         });
+        console.error(err);
+      });
    };        
     
     // when user has entered a new grade, update the state
@@ -131,7 +130,7 @@ class Gradebook extends Component {
  // check on properties.  location.assignment must exist  
 Gradebook.propTypes = {
   location: (properties, propertyName, componentName) => {
-      if ( properties.location.assignment == undefined ) {
+      if ( properties.location.assignment === undefined ) {
         return new Error('Gradebook missing required property assignment.');
     }
   }
