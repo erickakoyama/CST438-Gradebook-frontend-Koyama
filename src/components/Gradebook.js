@@ -18,7 +18,7 @@ import {SERVER_URL} from '../constants.js'
 class Gradebook extends Component {
     constructor(props) {
       super(props);
-      console.log("Gradebook.cnstr "+ JSON.stringify(props.location.assignment));
+      console.log("Gradebook.cnstr "+ JSON.stringify(props.location));
       this.state = { rows :  [] };
     } 
     
@@ -29,10 +29,11 @@ class Gradebook extends Component {
     fetchGrades = () => {
       console.log("Gradebook.fetchGrades");
       const token = Cookies.get('XSRF-TOKEN');
-      fetch(`${SERVER_URL}/gradebook/${this.props.location.assignment.assignmentId}`, 
+      const assignmentId = this.props.location.assignment?.assignmentId;
+      fetch(`${SERVER_URL}/gradebook/${assignmentId}`, 
         {  
           method: 'GET', 
-          headers: { 'X-XSRF-TOKEN': token }
+          headers: { 'X-XSRF-TOKEN': token, credentials: 'include' }
         } )
       .then((response) => response.json()) 
       .then((responseData) => { 
@@ -62,13 +63,17 @@ class Gradebook extends Component {
    handleSubmit = ( ) => {
       console.log("Gradebook.handleSubmit");
       const token = Cookies.get('XSRF-TOKEN');
+      const assignmentId = this.props.location.assignment?.assignmentId;
       
-      fetch(`${SERVER_URL}/gradebook/${this.props.location.assignment.assignmentId}` , 
+      fetch(`${SERVER_URL}/gradebook/${assignmentId}` , 
           {  
             method: 'PUT', 
-            headers: { 'Content-Type': 'application/json',
-                       'X-XSRF-TOKEN': token }, 
-            body: JSON.stringify({assignmentId:this.props.location.assignment.assignmentId,  grades: this.state.rows})
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-XSRF-TOKEN': token,
+              credentials: 'include'
+            }, 
+            body: JSON.stringify({assignmentId,  grades: this.state.rows})
           } )
       .then(res => {
           if (res.ok) {
@@ -114,8 +119,8 @@ class Gradebook extends Component {
             <div className="App">
               <Grid container>
                 <Grid item align="left">
-                   <h4>Assignment: {assignment.assignmentName}</h4>
-                   <h4>Course: {assignment.courseTitle}</h4>                   
+                   <h4>Assignment: {assignment?.assignmentName}</h4>
+                   <h4>Course: {assignment?.courseTitle}</h4>                   
                 </Grid>
               </Grid>
               <div style={{ height: 400, width: '100%' }}>
