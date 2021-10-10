@@ -140,7 +140,10 @@ class Assignment extends Component {
   render() {
     const isInstructor = this.state.perms === PERM_TYPES.instructor;
     const assignmentGradeColumns = [
-
+      { field: 'assignmentName', headerName: 'Assignment Name', width: 300 },
+      { field: 'courseTitle', headerName: 'Course', width: 300 },
+      { field: 'dueDate', headerName: 'Due Date', width: 300 },
+      { field: 'score', headerName: 'Score', width: 300 },
     ];
     const assignmentColumns = [
       {
@@ -166,6 +169,8 @@ class Assignment extends Component {
     const titleText = isInstructor ?
       'Assignment(s) ready to grade: ':
       'Assignment grade(s): ';
+
+    console.log(this.state.rows[this.state.selected])
 
     return (
       <div align="left" >
