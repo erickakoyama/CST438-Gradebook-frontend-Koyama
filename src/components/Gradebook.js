@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Redirect } from 'react-router-dom'
 import Grid from '@material-ui/core/Grid';
 import {DataGrid} from '@material-ui/data-grid';
 import Button from '@material-ui/core/Button';
 import Cookies from 'js-cookie';
-import {SERVER_URL} from '../constants.js'
+import {PERM_TYPES, SERVER_URL} from '../constants.js'
 
 // NOTE:  for OAuth security, http request must have
 //   credentials: 'include' 
@@ -18,32 +19,66 @@ import {SERVER_URL} from '../constants.js'
 class Gradebook extends Component {
     constructor(props) {
       super(props);
-      console.log("Gradebook.cnstr "+ JSON.stringify(props.location.assignment));
-      this.state = { rows :  [] };
-    } 
-    
-     componentDidMount() {
-      this.fetchGrades();
+      console.log("Gradebook.cnstr "+ JSON.stringify(props.location));
+      this.state = { 
+        perms: null,
+        rows :  [],
+        rowsLoading: null,
+      };
+    }
+
+    componentDidMount() {
+      this.fetchUserPerms();
+    }
+  
+    componentDidUpdate() {
+      if (this.state.perms && this.state.rowsLoading === null) {
+        this.fetchGrades();
+      }
+    }
+
+    fetchUserPerms = () => {
+      const token = Cookies.get('XSRF-TOKEN');
+      fetch(`${SERVER_URL}/user/perms`, 
+        {  
+          method: 'GET', 
+          credentials: 'include',
+          headers: { 'X-XSRF-TOKEN': token },
+        } )
+      .then((response) => {
+        return response.text();
+      }) 
+      .then((responseData) => {
+        this.setState({perms: responseData})       
+      })
+      .catch(err => {
+        console.error(err)
+      }); 
     }
  
     fetchGrades = () => {
+      this.setState({rowsLoading: true});
       console.log("Gradebook.fetchGrades");
       const token = Cookies.get('XSRF-TOKEN');
-      fetch(`${SERVER_URL}/gradebook/${this.props.location.assignment.assignmentId}`, 
+      const assignmentId = this.props.location.assignment?.assignmentId;
+      fetch(`${SERVER_URL}/gradebook/${assignmentId}`, 
         {  
           method: 'GET', 
+          credentials: 'include',
           headers: { 'X-XSRF-TOKEN': token }
         } )
       .then((response) => response.json()) 
       .then((responseData) => { 
         if (Array.isArray(responseData.grades)) {
           // add attribute "id" to each row. Required for DataGrid,  id is index of row (i.e. 0, 1, 2, ...)  
-          this.setState({ 
+          this.setState({
+            rowsLoading: false,
             rows: responseData.grades.map((row,index) => {
                   return {id:index, ...row};
             } )
           });
         } else {
+          this.setState({ rowsLoading: false });
           toast.error("Fetch failed.", {
             position: toast.POSITION.BOTTOM_LEFT
           });
@@ -62,13 +97,17 @@ class Gradebook extends Component {
    handleSubmit = ( ) => {
       console.log("Gradebook.handleSubmit");
       const token = Cookies.get('XSRF-TOKEN');
+      const assignmentId = this.props.location.assignment?.assignmentId;
       
-      fetch(`${SERVER_URL}/gradebook/${this.props.location.assignment.assignmentId}` , 
+      fetch(`${SERVER_URL}/gradebook/${assignmentId}` , 
           {  
             method: 'PUT', 
-            headers: { 'Content-Type': 'application/json',
-                       'X-XSRF-TOKEN': token }, 
-            body: JSON.stringify({assignmentId:this.props.location.assignment.assignmentId,  grades: this.state.rows})
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-XSRF-TOKEN': token,
+            },
+            credentials: 'include',
+            body: JSON.stringify({assignmentId,  grades: this.state.rows})
           } )
       .then(res => {
           if (res.ok) {
@@ -109,13 +148,17 @@ class Gradebook extends Component {
         ];
         
         const assignment = this.props.location.assignment;
+
+        if (this.state.perms === PERM_TYPES.student) {
+          return <Redirect to="/" />;
+        }
       
         return(
             <div className="App">
               <Grid container>
                 <Grid item align="left">
-                   <h4>Assignment: {assignment.assignmentName}</h4>
-                   <h4>Course: {assignment.courseTitle}</h4>                   
+                   <h4>Assignment: {assignment?.assignmentName}</h4>
+                   <h4>Course: {assignment?.courseTitle}</h4>                   
                 </Grid>
               </Grid>
               <div style={{ height: 400, width: '100%' }}>
