@@ -33,7 +33,8 @@ class Gradebook extends Component {
       fetch(`${SERVER_URL}/gradebook/${assignmentId}`, 
         {  
           method: 'GET', 
-          headers: { 'X-XSRF-TOKEN': token, credentials: 'include' }
+          credentials: 'include',
+          headers: { 'X-XSRF-TOKEN': token }
         } )
       .then((response) => response.json()) 
       .then((responseData) => { 
@@ -71,8 +72,8 @@ class Gradebook extends Component {
             headers: { 
               'Content-Type': 'application/json',
               'X-XSRF-TOKEN': token,
-              credentials: 'include'
-            }, 
+            },
+            credentials: 'include',
             body: JSON.stringify({assignmentId,  grades: this.state.rows})
           } )
       .then(res => {

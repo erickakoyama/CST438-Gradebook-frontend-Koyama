@@ -45,7 +45,8 @@ class Assignment extends Component {
     fetch(`${SERVER_URL}/user/perms`, 
       {  
         method: 'GET', 
-        headers: { 'X-XSRF-TOKEN': token, credentials: 'include' },
+        credentials: 'include',
+        headers: { 'X-XSRF-TOKEN': token },
       } )
     .then((response) => {
       return response.text();
@@ -68,7 +69,8 @@ class Assignment extends Component {
     fetch(fetchAssignmentsUrl, 
       {  
         method: 'GET', 
-        headers: { 'X-XSRF-TOKEN': token, credentials: 'include' },
+        credentials: 'include',
+        headers: { 'X-XSRF-TOKEN': token },
       } )
     .then((response) => response.json()) 
     .then((responseData) => {
@@ -105,8 +107,8 @@ class Assignment extends Component {
       headers: { 
         'Content-Type': 'application/json',
         'X-XSRF-TOKEN': token,
-        credentials: 'include'
-      }, 
+      },
+      credentials: 'include',
       body: JSON.stringify({
         assignmentName: data.name,
         courseId: data.courseId,
