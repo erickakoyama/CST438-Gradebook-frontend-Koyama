@@ -24,22 +24,21 @@ class Assignment extends Component {
     super(props);
     this.state = {
       selected: 0,
-      perms: PERM_TYPES.instructor,
+      perms: null,
       rowsLoading: null,
       rows: []
     };
   };
  
   componentDidMount() {
-    // this.fetchUserPerms();
-    this.fetchAssignments();
+    this.fetchUserPerms();
   }
 
-  // componentDidUpdate() {
-  //   if (this.state.perms && this.state.rowsLoading === null) {
-  //     this.fetchAssignments();
-  //   }
-  // }
+  componentDidUpdate() {
+    if (this.state.perms && this.state.rowsLoading === null) {
+      this.fetchAssignments();
+    }
+  }
 
   fetchUserPerms = () => {
     const token = Cookies.get('XSRF-TOKEN');
