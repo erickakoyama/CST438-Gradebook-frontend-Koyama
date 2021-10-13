@@ -57,6 +57,7 @@ class Gradebook extends Component {
     }
  
     fetchGrades = () => {
+      this.setState({rowsLoading: true});
       console.log("Gradebook.fetchGrades");
       const token = Cookies.get('XSRF-TOKEN');
       const assignmentId = this.props.location.assignment?.assignmentId;
@@ -70,12 +71,14 @@ class Gradebook extends Component {
       .then((responseData) => { 
         if (Array.isArray(responseData.grades)) {
           // add attribute "id" to each row. Required for DataGrid,  id is index of row (i.e. 0, 1, 2, ...)  
-          this.setState({ 
+          this.setState({
+            rowsLoading: false,
             rows: responseData.grades.map((row,index) => {
                   return {id:index, ...row};
             } )
           });
         } else {
+          this.setState({ rowsLoading: false });
           toast.error("Fetch failed.", {
             position: toast.POSITION.BOTTOM_LEFT
           });
