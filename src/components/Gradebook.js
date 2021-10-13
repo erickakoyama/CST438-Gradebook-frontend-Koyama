@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Redirect } from 'react-router-dom'
 import Grid from '@material-ui/core/Grid';
 import {DataGrid} from '@material-ui/data-grid';
 import Button from '@material-ui/core/Button';
 import Cookies from 'js-cookie';
-import {SERVER_URL} from '../constants.js'
+import {PERM_TYPES, SERVER_URL} from '../constants.js'
 
 // NOTE:  for OAuth security, http request must have
 //   credentials: 'include' 
@@ -19,11 +20,40 @@ class Gradebook extends Component {
     constructor(props) {
       super(props);
       console.log("Gradebook.cnstr "+ JSON.stringify(props.location));
-      this.state = { rows :  [] };
-    } 
-    
-     componentDidMount() {
-      this.fetchGrades();
+      this.state = { 
+        perms: null,
+        rows :  [],
+        rowsLoading: null,
+      };
+    }
+
+    componentDidMount() {
+      this.fetchUserPerms();
+    }
+  
+    componentDidUpdate() {
+      if (this.state.perms && this.state.rowsLoading === null) {
+        this.fetchGrades();
+      }
+    }
+
+    fetchUserPerms = () => {
+      const token = Cookies.get('XSRF-TOKEN');
+      fetch(`${SERVER_URL}/user/perms`, 
+        {  
+          method: 'GET', 
+          credentials: 'include',
+          headers: { 'X-XSRF-TOKEN': token },
+        } )
+      .then((response) => {
+        return response.text();
+      }) 
+      .then((responseData) => {
+        this.setState({perms: responseData})       
+      })
+      .catch(err => {
+        console.error(err)
+      }); 
     }
  
     fetchGrades = () => {
@@ -115,8 +145,10 @@ class Gradebook extends Component {
         ];
         
         const assignment = this.props.location.assignment;
-        console.log('this.props', this.props);
-        console.log('this.state', this.state);
+
+        if (this.state.perms === PERM_TYPES.student) {
+          return <Redirect to="/" />;
+        }
       
         return(
             <div className="App">

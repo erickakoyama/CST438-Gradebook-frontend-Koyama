@@ -8,16 +8,11 @@ import Radio from '@material-ui/core/Radio';
 import {DataGrid} from '@material-ui/data-grid';
 
 import NewAssignment from './NewAssignment';
-import {SERVER_URL} from '../constants.js'
+import {PERM_TYPES, SERVER_URL} from '../constants.js'
 
 // NOTE:  for OAuth security, http request must have
 //   credentials: 'include' 
 //
-
-const PERM_TYPES = {
-  instructor: 'instructor',
-  student: 'student'
-}
 
 class Assignment extends Component {
   constructor(props) {
