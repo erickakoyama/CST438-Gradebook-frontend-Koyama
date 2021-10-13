@@ -24,29 +24,29 @@ class Assignment extends Component {
     super(props);
     this.state = {
       selected: 0,
-      perms: null,
+      perms: PERM_TYPES.instructor,
       rowsLoading: null,
       rows: []
     };
   };
  
   componentDidMount() {
-    this.fetchUserPerms();
+    // this.fetchUserPerms();
+    this.fetchAssignments();
   }
 
-  componentDidUpdate() {
-    if (this.state.perms && this.state.rowsLoading === null) {
-      this.fetchAssignments();
-    }
-  }
+  // componentDidUpdate() {
+  //   if (this.state.perms && this.state.rowsLoading === null) {
+  //     this.fetchAssignments();
+  //   }
+  // }
 
   fetchUserPerms = () => {
     const token = Cookies.get('XSRF-TOKEN');
     fetch(`${SERVER_URL}/user/perms`, 
       {  
         method: 'GET', 
-        headers: { 'X-XSRF-TOKEN': token },
-        credentials: 'include'
+        headers: { 'X-XSRF-TOKEN': token, credentials: 'include' },
       } )
     .then((response) => {
       return response.text();
@@ -69,8 +69,7 @@ class Assignment extends Component {
     fetch(fetchAssignmentsUrl, 
       {  
         method: 'GET', 
-        headers: { 'X-XSRF-TOKEN': token },
-        credentials: 'include'
+        headers: { 'X-XSRF-TOKEN': token, credentials: 'include' },
       } )
     .then((response) => response.json()) 
     .then((responseData) => {

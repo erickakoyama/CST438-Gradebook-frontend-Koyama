@@ -17,9 +17,9 @@ class Login extends Component {
     const token = Cookies.get('XSRF-TOKEN');
     fetch(SERVER_URL + '/user', 
       {  
-        method: 'GET', redirect: 'follow', 
-        headers: { 'X-XSRF-TOKEN': token }, 
-        credentials: 'include'
+        method: 'GET',
+        redirect: 'follow', 
+        headers: { 'X-XSRF-TOKEN': token, credentials: 'include' }, 
       } )
     .catch(err => {
       console.error(err);
